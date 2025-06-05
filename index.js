@@ -9,13 +9,13 @@ app.use(express.json());
 const pgClient = new Client('postgresql://neondb_owner:npg_deSQsH1Lya8V@ep-winter-frost-a82hr8y4-pooler.eastus2.azure.neon.tech/neondb?sslmode=require');
 
 
-async function main(){
+async function Tmain(){
      await pgClient.connect();
     const response = await pgClient.query("UPDATE users SET username = 'ajeet123' WHERE id = 4 ;");
     console.log(response);
 };
 
-main();
+Tmain();
 
 
 app.post('/signup',  async (req, res) => {
