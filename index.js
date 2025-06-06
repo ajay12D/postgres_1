@@ -1,4 +1,4 @@
-    import {Client} from 'pg';
+import {Client} from 'pg';
 import express from 'express';
 
 const app = express();
@@ -11,28 +11,44 @@ const pgClient = new Client('postgresql://neondb_owner:npg_deSQsH1Lya8V@ep-winte
 
 async function Tmain(){
      await pgClient.connect();
-    const response = await pgClient.query("UPDATE users SET username = 'ajeet123' WHERE id = 4 ;");
-    console.log(response);
-};
+}
 
 Tmain();
 
 
 app.post('/signup',  async (req, res) => {
+try{
+    
     const username = req.body.username;
     const password = req.body.password;
     const email = req.body.email;
+    const city = req.body.city;
+    const country = req.body.country;
+    const pincode = req.body.pincode;
+    const street = req.body.street;
+    
 
-    const inserQuery = `INSERT INTO users (username, email, password) VALUES ('${username}','${email}', '${password}');`
+    const insertUser = `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id;`
+    const insertAddress = `INSERT INTO addresses (city, country, street, pincode, user_id) VALUES ($1, $2, $3, $4, $5);`
 
-    const response = await pgClient.query(inserQuery);
+     await pgClient.query('BEGIN');
+    const response = await pgClient.query(insertUser, [username, email, password]);
+    console.log(response.rows);
 
-
+      await new Promise(x => setTimeout(x, 100 *1000))
+    const response2 = await pgClient.query(insertAddress, [city, country, pincode, street, response.rows[0].id]);
+     await pgClient.query('COMMIT');
         res.status(200).json({
             message: 'User created successfully'
         })
+    }
+catch(e){
+     res.status(500).json({
+        message: 'error in user creation',
+        error: e.message
+     })
+ }
 });
-
 
 
 app.listen(3000);
